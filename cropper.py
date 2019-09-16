@@ -11,6 +11,10 @@ def get_current_path():
         current_path = os.path.dirname(os.path.realpath(__file__))
     return current_path
 
+def create_gif(images):
+    # Save into a GIF file that loops forever
+    images[0].save('pictures.gif', format='GIF', append_images=images[1:], save_all=True, duration=100, loop=0)
+
 # Detects all faces from received image using received cascade
 def detect_faces(image_path, cascade_path):
     # Create the haar cascade
@@ -57,7 +61,7 @@ def bottom_crop(margin_bottom = 10, image_name = "image", image_extension = "jpg
         cv2.imwrite(file_path, crop_img)
 
 # Detects faces and crops a rectangle
-def rectangle_crop(image_name = "image", image_extension = "jpg", margin_top = 50, margin_left = 10, margin_right = 10, margin_bottom = 10):
+def rectangle_crop(image_name = "image", image_extension = "jpg", margin_top = 50, margin_left = 20, margin_right = 20, margin_bottom = 15):
     # Get user supplied values
     current_path = get_current_path()
     image_extension = "." + image_extension

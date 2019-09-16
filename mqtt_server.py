@@ -4,7 +4,7 @@ import time
 from picamera import PiCamera
 import subprocess
 import os
-from cropper import rectangle_crop, bottom_crop
+from cropper import rectangle_crop, bottom_crop, create_gif
 
 print("Cabine ZRZS :: Server")
 
@@ -28,7 +28,7 @@ print("photo requested: " + date)
 
 
 h = subprocess.Popen(["scp", "pi@192.168.0.11:/home/pi/image_1.jpg", "/home/pi/image_1.jpg"])
-sts = os.waitpid(i.pid, 0)
+sts = os.waitpid(h.pid, 0)
 
 i = subprocess.Popen(["scp", "pi@192.168.0.12:/home/pi/image_2.jpg", "/home/pi/image_2.jpg"])
 sts = os.waitpid(i.pid, 0)
@@ -43,6 +43,7 @@ l = subprocess.Popen(["scp", "pi@192.168.0.15:/home/pi/image_5.jpg", "/home/pi/i
 sts = os.waitpid(l.pid, 0)
 
 rectangle_crop()
+# create_gif()
 
 client.disconnect()
 
