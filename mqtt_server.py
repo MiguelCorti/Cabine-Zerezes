@@ -10,7 +10,7 @@ print("Cabine ZRZS :: Server")
 
 date = datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
 
-broker_url = "192.168.0.11"
+broker_url = "192.168.0.11" #tem que mexer nisso aqui
 broker_port = 1883
 
 def on_connect(client, userdata, flags, rc):
