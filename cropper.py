@@ -1,6 +1,8 @@
 import cv2
 import os
 import sys
+import datetime
+from PIL import Image
 
 # Returns path where this script is running
 def get_current_path():
@@ -11,9 +13,19 @@ def get_current_path():
         current_path = os.path.dirname(os.path.realpath(__file__))
     return current_path
 
-def create_gif(images):
+def create_gif(image_path):
     # Save into a GIF file that loops forever
-    images[0].save('pictures.gif', format='GIF', append_images=images[1:], save_all=True, duration=100, loop=0)
+    images = []
+    for i in range(1, 6):
+        file_name = image_path + '/image_cropped_' + str(i) + '.jpg'
+        images.append(Image.open(file_name))
+    for i in range(1, 6):
+        file_name = image_path + '/image_cropped_' + str(6-i) + '.jpg'
+        images.append(Image.open(file_name))
+
+    date = datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
+    gif_name = date + '_final_image.gif'
+    images[0].save(gif_name, format='GIF', append_images=images[1:], save_all=True, duration=200, loop=0)
 
 # Detects all faces from received image using received cascade
 def detect_faces(image_path, cascade_path):
@@ -61,7 +73,7 @@ def bottom_crop(margin_bottom = 10, image_name = "image", image_extension = "jpg
         cv2.imwrite(file_path, crop_img)
 
 # Detects faces and crops a rectangle
-def rectangle_crop(image_name = "image", image_extension = "jpg", margin_top = 50, margin_left = 20, margin_right = 20, margin_bottom = 15):
+def rectangle_crop(image_name = "image", image_extension = "jpg", margin_top = 50, margin_left = 50, margin_right = 50, margin_bottom = 20):
     # Get user supplied values
     current_path = get_current_path()
     image_extension = "." + image_extension

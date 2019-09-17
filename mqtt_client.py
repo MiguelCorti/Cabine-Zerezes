@@ -6,7 +6,7 @@ from picamera import PiCamera
 
 print("Cabine ZRZS :: Client")
 
-broker_url = "192.168.0.11"
+broker_url = "192.168.0.3"
 broker_port = 1883
 
 def on_connect(client, userdata, flags, rc):
@@ -17,7 +17,7 @@ def on_message(client, userdata, message):
    #camera.rotation = 270
    camera.resolution = (3280, 2464)
    camera.awb_mode = 'fluorescent'
-   camera.capture('/home/pi/image_5.jpg')
+   camera.capture('/home/pi/image_1.jpg')
    time.sleep(.5)
    camera.close()
    date = datetime.datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
