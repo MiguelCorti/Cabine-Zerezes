@@ -5,26 +5,25 @@ import datetime
 from PIL import Image
 
 # Returns path where this script is running
-def get_current_path():
+def get_current_path(argv, file):
     current_path = '.'
     if __file__ == None:
-        current_path = os.path.dirname(os.path.realpath(sys.argv[0]))
+        current_path = os.path.dirname(os.path.realpath(argv))
     else:
-        current_path = os.path.dirname(os.path.realpath(__file__))
+        current_path = os.path.dirname(os.path.realpath(file))
     return current_path
 
-def create_gif(image_path):
-    # Save into a GIF file that loops forever
+def create_gif(cropped_paths, image_path):
     images = []
-    for i in range(1, 6):
-        file_name = image_path + '/image_cropped_' + str(i) + '.jpg'
-        images.append(Image.open(file_name))
-    for i in range(1, 6):
-        file_name = image_path + '/image_cropped_' + str(6-i) + '.jpg'
-        images.append(Image.open(file_name))
+    num_of_imgs = len(cropped_paths)
+    for i in range(0, num_of_imgs):
+        images.insert(i, Image.open(cropped_paths[i]))
+        if i != 0:
+            reverse_index = -(i+1)
+            images.append(Image.open(cropped_paths[reverse_index]))
 
-    date = datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
-    gif_name = date + '_final_image.gif'
+    # Save into a GIF file that loops forever
+    gif_name = image_path + '/final_image.gif'
     images[0].save(gif_name, format='GIF', append_images=images[1:], save_all=True, duration=200, loop=0)
 
 # Detects all faces from received image using received cascade
@@ -49,53 +48,68 @@ def detect_faces(image_path, cascade_path):
     return faces
 
 # Detects faces and crops them only chin down
-def bottom_crop(margin_bottom = 10, image_name = "image", image_extension = "jpg"):
-    image_extension = "." + image_extension
-    cropped_image_name = image_name + "_cropped"
-
-    # Defining path variables
-    current_path = get_current_path()
-    frontalImagePath = current_path + "/" + image_name + '_3' + image_extension
+def bottom_crop(all_paths, margin_bottom = 10):
+    # Get user supplied values
+    current_path = get_current_path(sys.argv[0], __file__)
     cascPath = current_path + "/haarcascade_frontalface_default.xml"
 
-    # Getting all faces within image
-    faces = detect_faces(frontalImagePath, cascPath)
+    middle_index = int(len(all_paths)/2)
+    # Detect faces in the image
+    faces = detect_faces(all_paths[middle_index], cascPath)
+
+    print("Found {0} faces!".format(len(faces)))
 
     # Croping all 5 images based on the frontal detection
     (x, y, w, h) = faces[0]
     endY = y + h + margin_bottom
-    for i in range(1,6):
-        currentImagePath = current_path + "/" + image_name + '_' + str(i) + image_extension
-        image = cv2.imread(currentImagePath)
+    cropped_paths = []
+    for i in range(0,len(all_paths)):
+        image = cv2.imread(all_paths[i])
 
         crop_img = image[0:endY].copy()
-        file_path = current_path + "/" + cropped_image_name + '_' + str(i) + image_extension
+        img_dir = current_path + "/images"
+        if not os.path.exists(img_dir):
+            os.mkdir(img_dir)
+
+        file_path = img_dir + "/cropped_image_" + str(i+1) + ".jpg"
         cv2.imwrite(file_path, crop_img)
+        cropped_paths += [file_path]
+
+    return cropped_paths
 
 # Detects faces and crops a rectangle
-def rectangle_crop(image_name = "image", image_extension = "jpg", margin_top = 50, margin_left = 50, margin_right = 50, margin_bottom = 20):
+def rectangle_crop(all_paths, margins):
     # Get user supplied values
-    current_path = get_current_path()
-    image_extension = "." + image_extension
-    cropped_image_name = image_name + "_cropped"
-    frontalImagePath = current_path + "/" + image_name + '_3' + image_extension
+    current_path = get_current_path(sys.argv[0], __file__)
     cascPath = current_path + "/haarcascade_frontalface_default.xml"
 
+    middle_index = int(len(all_paths)/2)
     # Detect faces in the image
-    faces = detect_faces(frontalImagePath, cascPath)
+    faces = detect_faces(all_paths[middle_index], cascPath)
 
-    print("Found {0} faces!".format(len(faces)))
+    num_faces = len(faces)
+    print("Found {0} faces!".format(num_faces))
+    if num_faces == 0:
+        print("Can't crop without a face reference.")
+        return all_paths
 
     # Crop the face
     (x, y, w, h) = faces[0]
-    startY = y - margin_top
-    startX = x - margin_left
-    endY = y + h + margin_bottom
-    endX = x + w + margin_right
-    for i in range(1,6):
-        currentImagePath = current_path + "/" + image_name + '_' + str(i) + image_extension
-        image = cv2.imread(currentImagePath)
+    startY = y - margins["top"]
+    startX = x - margins["left"]
+    endY = y + h + margins["bottom"]
+    endX = x + w + margins["right"]
+    cropped_paths = []
+    for i in range(0,len(all_paths)):
+        image = cv2.imread(all_paths[i])
 
         crop_img = image[startY:endY, startX:endX].copy()
-        file_path = current_path + "/" + cropped_image_name + '_' + str(i) + image_extension
+        img_dir = current_path + "/images"
+        if not os.path.exists(img_dir):
+            os.mkdir(img_dir)
+
+        file_path = img_dir + "/cropped_image_" + str(i+1) + ".jpg"
         cv2.imwrite(file_path, crop_img)
+        cropped_paths += [file_path]
+
+    return cropped_paths
