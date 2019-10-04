@@ -70,6 +70,7 @@ for i in range(1,6):
 
 client.disconnect()
 
+all_paths = cropper.rotate_images(all_paths)
 margins = {
     "top": 200,
     "bottom": 25,

@@ -13,6 +13,14 @@ def get_current_path(argv, file):
         current_path = os.path.dirname(os.path.realpath(file))
     return current_path
 
+def rotate_images(all_paths):
+    for path in all_paths:
+        img = Image.open(path)
+        img = img.transpose(Image.ROTATE_90)
+        img.save(path)
+
+    return all_paths
+
 def create_gif(cropped_paths, image_path):
     images = []
     num_of_imgs = len(cropped_paths)
